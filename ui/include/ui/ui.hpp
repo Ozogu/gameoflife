@@ -26,5 +26,10 @@ public:
     void PrintPrerunInstruction();
     bool GetBoardSizeFromInput(int& gridSize);
     PrerunInput_t GetUserPrerunInput(GameLogic& Game);
+
+private:
+    void PrintXCoordinate(GameLogic& Game);
+    PrerunInput_t ParseToggleCommand(std::vector<std::string>& splitList, int boardSize);
+    bool Inbounds(int x, int y, int boardSize);
 };
 

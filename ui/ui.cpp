@@ -45,37 +45,18 @@ void UI::Draw(GameLogic& Game)
 {
     // Print board and Y coordinate
     int indexY = 0;
-    for (auto i : Game.GetBoard())
+    for (auto row : Game.GetBoard())
     {
-        for (auto j : i)
+        for (auto cell : row)
         {
-            auto token = j ? "X" : ".";
+            auto token = cell ? "X" : ".";
             std::cout << token << " ";
         }
         std::cout << indexY << std::endl;
         indexY++;
     }
 
-    // Print X coordinate.
-    int size = Game.GetBoardSize();
-    for (int i = 0; i < size; i++)
-    {
-        std::cout << i % 10 << " ";
-    }
-    std::cout << std::endl;
-
-    for (int i = 0; i < size; i++)
-    {
-        if (i % 10 == 0)
-        {
-            std::cout << i % 100 / 10 << " ";
-        }
-        else
-        {
-            std::cout << "  ";
-        }
-    }
-    std::cout << std::endl;
+    PrintXCoordinate(Game);
 }
 
 void UI::NotifyBoardSizeSet(const int size)
@@ -110,7 +91,45 @@ UI::PrerunInput_t UI::GetUserPrerunInput(GameLogic& Game)
         retval.command = PrerunCommand::Step;
         retval.success = true;
     }
-    else if (splitList.size() != 2)
+    else
+    {
+       retval = ParseToggleCommand(splitList, boardSize);
+    }
+
+    return retval;
+}
+
+// Private
+
+void UI::PrintXCoordinate(GameLogic& Game)
+{
+    int size = Game.GetBoardSize();
+    // Print least significant coordinate on row
+    for (int i = 0; i < size; i++)
+    {
+        std::cout << i % 10 << " ";
+    }
+    std::cout << std::endl;
+
+    // Print 2nd. least significant coordinate on another row
+    for (int i = 0; i < size; i++)
+    {
+        if (i % 10 == 0)
+        {
+            std::cout << i % 100 / 10 << " ";
+        }
+        else
+        {
+            std::cout << "  ";
+        }
+    }
+    std::cout << std::endl;
+}
+
+UI::PrerunInput_t UI::ParseToggleCommand(std::vector<std::string>& splitList, int boardSize)
+{
+    PrerunInput_t retval = { false, PrerunCommand::Run, 0, 0 };
+    if (splitList.size() != 2)
     {
         std::cout << "Incorrect format: wrong number of elements!" << std::endl;
     }
@@ -123,7 +142,7 @@ UI::PrerunInput_t UI::GetUserPrerunInput(GameLogic& Game)
         int x = std::stoi(splitList[0]);
         int y = std::stoi(splitList[1]);
 
-        if (x >= boardSize || y >= boardSize || x < 0 || y < 0)
+        if (!Inbounds(x, y, boardSize))
         {
             std::cout << "Incorrect format: Input is out of Board range! (0-" << boardSize-1 << ")" << std::endl;
         }
@@ -137,4 +156,9 @@ UI::PrerunInput_t UI::GetUserPrerunInput(GameLogic& Game)
     }
 
     return retval;
+}
+
+inline bool UI::Inbounds(int x, int y, int boardSize)
+{
+    return x < boardSize && y < boardSize && x >= 0 && y >= 0;
 }
